@@ -6,7 +6,7 @@ export const GuardSkin = () => {
     <>
       <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-primary">
         <div class="container">
-          <a class="navbar-brand" href="#">
+          <a class="navbar-brand" href="/">
             Vaccination Platform
           </a>
           <button
