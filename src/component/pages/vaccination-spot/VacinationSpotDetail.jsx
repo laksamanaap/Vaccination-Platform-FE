@@ -1,17 +1,45 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import client from "../../../utils/router";
 
 export const VacinationSpotDetail = () => {
+  const { id } = useParams();
+
+  const [spotDetailData, setSpotDetailData] = useState({});
+
+  const fetchSpotDetail = async () => {
+    try {
+      const response = await client.get(`v1/spots/${id}`);
+      setSpotDetailData(response?.data.spot);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleRegisterVaccination = (e) => {
+    e.preventDefault();
+    console.log("registered");
+  };
+
+  useEffect(() => {
+    fetchSpotDetail();
+  }, []);
+
+  console.log(spotDetailData);
+
   return (
     <main>
       <header class="jumbotron">
         <div class="container d-flex justify-content-between align-items-center">
           <div>
-            <h1 class="display-4">Napitupulu Hospital</h1>
-            <span class="text-muted">
-              Jln. HOS. Cjokroaminoto (Pasirkaliki) No. 900, DKI Jakarta
-            </span>
+            <h1 class="display-4">{spotDetailData.name ?? "-"}</h1>
+            <span class="text-muted">{spotDetailData.address ?? "-"}</span>
           </div>
-          <a href="" class="btn btn-primary">
+          <a
+            href=""
+            class="btn btn-primary"
+            onClick={handleRegisterVaccination}
+          >
             Register vaccination
           </a>
         </div>
