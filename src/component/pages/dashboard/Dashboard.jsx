@@ -37,6 +37,11 @@ export const Dashboard = () => {
   console.log(consultationStatus);
   console.log(vaccinationDoseFirst);
 
+  const formatDate = (inputDate) => {
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Date(inputDate).toLocaleDateString("en-US", options);
+  };
+
   return (
     <main>
       <header class="jumbotron">
@@ -194,7 +199,9 @@ export const Dashboard = () => {
                               </tr>
                               <tr>
                                 <th>Date</th>
-                                <td class="text-muted">{vaccination?.date}</td>
+                                <td class="text-muted">
+                                  {formatDate(vaccination?.date)}
+                                </td>
                               </tr>
                               <tr>
                                 <th>Spot</th>

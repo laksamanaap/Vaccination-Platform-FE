@@ -14,6 +14,16 @@ body {
     cursor: pointer;
     background: #FAFAFA;
 }
+
+.spot.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spot-name.disabled {
+    cursor: not-allowed;
+}
+
 .unavailable {
     opacity: 0.5;
     cursor: default;

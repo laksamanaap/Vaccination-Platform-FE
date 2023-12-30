@@ -58,30 +58,50 @@ export const VacinationSpot = () => {
 
         <div class="section-body mt-4">
           {spotsData.length > 0 &&
-            spotsData.map((spot, index) => (
-              <article class="spot" key={index}>
-                <div class="row">
-                  <div class="col-5">
-                    <h5 class="text-primary">
-                      <a href={`/vacination-spot/detail/${spot.id}`}>
-                        {spot.name}
-                      </a>
-                    </h5>
-                    <span class="text-muted">{spot.address}</span>
+            spotsData.map((spot, index) => {
+              const isDisabled =
+                (spot.serve === 2 && vaccinationData.length === 0) ||
+                spot.serve === 1;
+
+              return (
+                <article
+                  className={`spot ${isDisabled ? "disabled" : ""}`}
+                  key={index}
+                >
+                  <div className="row">
+                    <div className="col-5">
+                      <h5 className="text-primary">
+                        <a
+                          href={`${
+                            isDisabled
+                              ? ""
+                              : `/vacination-spot/detail/${spot.id}`
+                          } `}
+                          className={`spot-name ${isDisabled && "disabled"}`}
+                        >
+                          {spot.name}
+                        </a>
+                      </h5>
+                      <span className="text-muted">{spot.address}</span>
+                    </div>
+                    <div className="col-4">
+                      <h5>Available vaccines</h5>
+                      <span className="text-muted">
+                        {spot.spot_vaccine.vaccine.name}
+                      </span>
+                    </div>
+                    <div className="col-3">
+                      <h5>Serve</h5>
+                      <span className="text-muted">
+                        {spot.serve === 1 && "Only first vaccination"}
+                        {spot.serve === 2 && "Only Second vaccination"}
+                        {spot.serve === 3 && "Both vaccination"}
+                      </span>
+                    </div>
                   </div>
-                  <div class="col-4">
-                    <h5>Available vaccines</h5>
-                    <span class="text-muted">
-                      {spot.spot_vaccine.vaccine.name}
-                    </span>
-                  </div>
-                  <div class="col-3">
-                    <h5>Serve</h5>
-                    <span class="text-muted">{spot.serve}</span>
-                  </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
         </div>
       </div>
     </main>
