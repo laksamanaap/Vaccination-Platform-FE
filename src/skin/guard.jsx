@@ -1,7 +1,26 @@
-import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Outlet } from "react-router-dom";
 
 export const GuardSkin = () => {
+  const navigate = useNavigate();
+
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token")); // If token exists, user is logged in true
+  const society_name = localStorage.getItem("name");
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("name");
+
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
+  }, [isLoggedIn, navigate]);
+
   return (
     <>
       <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-primary">
@@ -23,11 +42,26 @@ export const GuardSkin = () => {
 
           <div class="collapse navbar-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav ml-auto">
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  Login
-                </a>
-              </li>
+              {isLoggedIn ? (
+                <>
+                  <li class="nav-item">
+                    <a class="nav-link" href="#">
+                      {society_name}
+                    </a>
+                  </li>
+                  <li class="nav-item" onClick={handleLogout}>
+                    <a class="nav-link" href="#">
+                      Logout
+                    </a>
+                  </li>
+                </>
+              ) : (
+                <li class="nav-item">
+                  <a class="nav-link" href="/login">
+                    Login
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
         </div>

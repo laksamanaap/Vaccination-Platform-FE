@@ -50,11 +50,11 @@ const routes = createBrowserRouter([
     ],
   },
   {
-    path: "/vacination-spot/detail",
+    path: "/vacination-spot/detail/:id",
     element: <GuardSkin />,
     children: [
       {
-        path: "/vacination-spot/detail",
+        path: "/vacination-spot/detail/:id",
         element: <VacinationSpotDetail />,
       },
     ],
