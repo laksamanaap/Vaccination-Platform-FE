@@ -135,6 +135,17 @@ export const Dashboard = () => {
           </div>
           <div class="section-body">
             <div class="row mb-4">
+              {/* Handle banner show*/}
+              {consultationStatus === undefined && (
+                <div class="col-md-12">
+                  <div class="alert alert-warning">
+                    Your consultation must be approved by the doctor to get the
+                    vaccine.
+                  </div>
+                </div>
+              )}
+
+              {/* Handle banner show*/}
               {consultationStatus === "pending" && (
                 <div class="col-md-12">
                   <div class="alert alert-warning">

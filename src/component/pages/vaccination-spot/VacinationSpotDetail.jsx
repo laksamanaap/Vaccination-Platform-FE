@@ -4,28 +4,147 @@ import client from "../../../utils/router";
 
 export const VacinationSpotDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [spotDetailData, setSpotDetailData] = useState({});
+  const [vaccinationDate, setVaccinationDate] = useState("");
+  const [vacinationCount, setVacinationCount] = useState({});
+  const [vacinationCountList, setVacinationCountList] = useState([]);
+  const [vacinationListByDate, setVacinationListByDate] = useState([]);
 
-  const fetchSpotDetail = async () => {
+  // Handle Message
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const fetchSpotDetail = async (selectedDate) => {
     try {
-      const response = await client.get(`v1/spots/${id}`);
+      const response = await client.get(`v1/spots/${id}?date=${selectedDate}`);
+      console.log(response);
+      setVacinationListByDate(response?.data.vaccination_list_date);
+      setVacinationCountList(response?.data.vaccinations_count_list);
+      setVacinationCount(response?.data.vaccinations_count);
       setSpotDetailData(response?.data.spot);
     } catch (err) {
       console.log(err);
     }
   };
 
-  const handleRegisterVaccination = (e) => {
+  // Handle store vaccination
+  const handleRegisterVaccination = async (e) => {
     e.preventDefault();
-    console.log("registered");
+
+    try {
+      const payload = {
+        date: vaccinationDate,
+        spot_id: String(id),
+        vaccine_id: String(spotDetailData?.spot_vaccine.vaccine_id),
+        doctor_id: "4",
+      };
+
+      const response = await client.post("v1/vaccinations", payload);
+      console.log(response);
+
+      setSuccessMessage("Success Register Vaccination!");
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+    } catch (err) {
+      setErrorMessage(err?.response.data);
+      console.log(err);
+    }
+  };
+
+  // Handle filter by date
+  const handleDateChange = (e) => {
+    // console.log(String(e.target.value));
+    setVaccinationDate(String(e.target.value));
+    fetchSpotDetail(String(e.target.value));
   };
 
   useEffect(() => {
-    fetchSpotDetail();
-  }, []);
+    fetchSpotDetail(vaccinationDate);
+  }, [vaccinationDate]);
 
-  console.log(spotDetailData);
+  // For generating session card
+  const generateSessions = () => {
+    const sessions = [];
+    const sessionsCount = Math.ceil(spotDetailData.capacity / 5);
+
+    for (let i = 1; i <= sessionsCount; i++) {
+      sessions.push(
+        <div key={i} className="col-md-4">
+          <div className="card card-default">
+            <div className="card-body">
+              <div className="d-flex align-items-center justify-content-between mb-3">
+                <h4>Session {i}</h4>
+                <span className="text-muted">
+                  {i === 2
+                    ? "13:00 - 15:00"
+                    : i === 3
+                    ? "15:00 - 17:00"
+                    : "09:00 - 11:00"}
+                </span>
+              </div>
+              {generateSlots(i)}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return sessions;
+  };
+
+  // For generating slots card (inside session)
+  const generateSlots = (session) => {
+    const slots = [];
+    const startSlot = (session - 1) * 5 + 1;
+    const endSlot = Math.min(session * 5, spotDetailData.capacity);
+
+    const mySocietyId = localStorage.getItem("society_id");
+    const totalVaccinations = vacinationCountList.length;
+    console.log("Total Vaccinations : ", totalVaccinations);
+
+    for (let i = startSlot; i <= endSlot; i++) {
+      const slotNumber = i < 10 ? `#0${i}` : `#${i}`;
+
+      // Check if the slot is filled by anyone
+      const isFilled = i <= totalVaccinations;
+
+      // Check if the slot if mine or not
+      const isMySlot = vacinationCountList.some((vaccination) => {
+        // console.log("Vaccination: ", vaccination);
+        return vaccination.society_id === mySocietyId;
+      });
+
+      slots.push(
+        <div key={i} className={`col-4 mb-4 ${isFilled ? "filled" : ""}`}>
+          <div
+            className={`slot ${
+              isMySlot
+                ? "filled bg-primary text-white"
+                : isFilled
+                ? "filled"
+                : ""
+            }`}
+          >
+            {slotNumber}
+          </div>
+        </div>
+      );
+    }
+
+    return <div className="row">{slots}</div>;
+  };
+
+  console.log("Spots detail data : ", spotDetailData);
+  console.log("Vaccination Count : ", vacinationCount);
+  console.log("Vaccination Count List : ", vacinationCountList);
+
+  console.log("Vaccination Date : ", vaccinationDate);
+  console.log("Vaccination Data list by date : ", vacinationListByDate);
+
+  console.log(errorMessage);
 
   return (
     <main>
@@ -47,105 +166,45 @@ export const VacinationSpotDetail = () => {
 
       <div class="container">
         <div class="row mb-3">
+          {successMessage && (
+            <div className="col-md-12">
+              <div className="alert alert-success">{successMessage}</div>
+            </div>
+          )}
+
+          {errorMessage.length > 0 && (
+            <div className="col-md-12">
+              <div className="alert alert-danger">
+                {errorMessage.map((errorObj, index) => (
+                  <div key={index}>
+                    {Object.entries(errorObj).map(([key, value]) => (
+                      <div key={key}>
+                        <strong>{key}:</strong>{" "}
+                        {Array.isArray(value)
+                          ? value.join(", ")
+                          : String(value)}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div class="col-md-3">
             <div class="form-group">
               <label for="vaccination-date">Select vaccination date</label>
-              <input type="date" class="form-control" id="vaccination-date" />
+              <input
+                type="date"
+                class="form-control"
+                id="vaccination-date"
+                onChange={handleDateChange}
+              />
             </div>
           </div>
         </div>
 
-        <div class="row mb-5">
-          <div class="col-md-4">
-            <div class="card card-default">
-              <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <h4>Session 1</h4>
-                  <span class="text-muted">09:00 - 11:00</span>
-                </div>
-                <div>
-                  <div class="row">
-                    <div class="col-4 mb-4">
-                      <div class="slot filled"> #1 </div>
-                    </div>
-                    <div class="col-4 mb-4">
-                      <div class="slot filled"> #2 </div>
-                    </div>
-                    <div class="col-4 mb-4">
-                      <div class="slot filled"> #3 </div>
-                    </div>
-                    <div class="col-4 mb-4">
-                      <div class="slot filled"> #4 </div>
-                    </div>
-                    <div class="col-4 mb-4">
-                      <div class="slot filled"> #5 </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card card-default">
-              <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <h4>Session 2</h4>
-                  <span class="text-muted">13:00 - 15:00</span>
-                </div>
-                <div>
-                  <div class="row">
-                    <div class="col-4 mb-4">
-                      <div class="slot filled"> #6 </div>
-                    </div>
-                    <div class="col-4 mb-4">
-                      <div class="slot filled"> #7 </div>
-                    </div>
-                    <div class="col-4 mb-4">
-                      <div class="slot bg-primary text-white"> #8 </div>
-                    </div>
-                    <div class="col-4 mb-4">
-                      <div class="slot"> #9 </div>
-                    </div>
-                    <div class="col-4 mb-4">
-                      <div class="slot"> #10 </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card card-default">
-              <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <h4>Session 3</h4>
-                  <span class="text-muted">15:00 - 17:00</span>
-                </div>
-                <div>
-                  <div class="row">
-                    <div class="col-4 mb-4">
-                      <div class="slot"> #11 </div>
-                    </div>
-                    <div class="col-4 mb-4">
-                      <div class="slot"> #12 </div>
-                    </div>
-                    <div class="col-4 mb-4">
-                      <div class="slot"> #13 </div>
-                    </div>
-                    <div class="col-4 mb-4">
-                      <div class="slot"> #14 </div>
-                    </div>
-                    <div class="col-4 mb-4">
-                      <div class="slot"> #15 </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="row mb-5">{generateSessions()}</div>
       </div>
     </main>
   );

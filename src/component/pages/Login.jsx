@@ -34,6 +34,7 @@ export const Login = () => {
 
       localStorage.setItem("token", data.login_tokens);
       localStorage.setItem("name", data.name);
+      localStorage.setItem("society_id", data.id);
 
       setSuccessMessage("Login Success");
 
