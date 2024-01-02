@@ -49,8 +49,8 @@ export const VacinationSpotDetail = () => {
         navigate("/");
       }, 2000);
     } catch (err) {
-      setErrorMessage(err?.response.data);
       console.log(err);
+      setErrorMessage(err?.response.data);
     }
   };
 
@@ -188,6 +188,12 @@ export const VacinationSpotDetail = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="col-md-12">
+              <div className="alert alert-danger">{errorMessage.message}</div>
             </div>
           )}
 
